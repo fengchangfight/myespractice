@@ -601,6 +601,53 @@ GET /_analyze
   "text" : "this is a test"
 }
 
-GET /texta/_settings
+GET /sa/_settings
 
-# how normalizer work???
+PUT /_index_template/template_1
+{
+  "index_patterns" : ["te*"],
+  "priority" : 1,
+  "template": {
+    "settings" : {
+      "number_of_shards" : 2
+    }
+  }
+}
+
+PUT _index_template/template_2
+{
+  "index_patterns" : ["ge*"],
+  "template": {
+    "settings" : {
+        "number_of_shards" : 1
+    },
+    "aliases" : {
+        "alias1" : {}
+    }
+  }
+}
+
+PUT ge1
+
+PUT ge2
+
+GET alias1
+
+POST alias1/_doc/
+{
+  "@timestamp": "2099-11-15T13:12:00",
+  "message": "GET /search HTTP/1.1 200 1070000",
+  "user": {
+    "id": "kimchy2"
+  }
+}
+
+GET ge2
+
+GET alias1/_search
+{
+    "query": {
+        "match_all": {}
+    }
+}
+
