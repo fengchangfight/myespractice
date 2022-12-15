@@ -5,47 +5,78 @@ GET _search
   }
 }
 
+#查看cluster health
+GET /_cluster/health
+
 GET /_cat/nodes
 
 GET /_cat/shards
 
+GET _cat/shards?h=id,index,shard,prirep,state
+
+#Provides an explanation for a shard’s current allocation.This API can be very useful when attempting to diagnose why a shard is unassigned or why a shard continues to remain on its current node when you might expect otherwise.
+GET /_cluster/allocation/explain
+{
+  "index": "kibana_sample_data_ecommerce",
+  "shard": "g8hd-naYSxK8yyquweJGvg",
+  "primary": false,
+  "current_node": "elk01"
+}
+
+#简单粗暴search all
 POST /kibana_sample_data_ecommerce/_search
 {}
 
+#关键词搜索
+POST /kibana_sample_data_ecommerce/_search?q=2
+{}
+
+#过滤搜索结果中返回哪些path
+POST /kibana_sample_data_ecommerce/_search?q=2&filter_path=took,hits.hits._source.currency
+{}
+
+# 查看指定index的mapping 和setting
 GET /kibana_sample_data_ecommerce
 
+# _count API统计
 GET /kibana_sample_data_ecommerce/_count
 
+# _cat API的helper function
 GET /_cat
 
+# v意味verbose, s为sort
 GET /_cat/indices/kibana*?v&s=index
 
-GET /_cluster/health
-
-GET /_cluster/allocation/explain
-
+# 此条可在不存在users index的情况下执行，直接创建user doc
 POST users/_doc
 {
 	"user" : "Mike",
-    "post_date" : "2019-04-15T14:12:12",
-    "message" : "trying out Kibana"
+  "post_date" : "2019-04-15T14:12:12",
+  "message" : "trying out Kibana"
 }
 
+# 查询users index
+POST users/_search
+{}
+
+#直接指定id和属性，用PUT方式,PUT是幂等的
 PUT users/_doc/1?op_type=create
 {
     "user" : "Jack",
     "post_date" : "2019-05-15T14:12:12",
     "message" : "trying out Elasticsearch"
 }
-'
+
+# 按照idget某条document
 GET users/_doc/1
 
+# 这条会把其他field删除
 PUT users/_doc/1
 {
 	"user" : "Mike"
-
 }
 
+#这种update形式不会影响其他field
 POST users/_update/1/
 {
     "doc":{
@@ -54,62 +85,88 @@ POST users/_update/1/
     }
 }
 
-POST test2/_search
+# 查询users index
+POST users/_search
 {}
 
+#创建一个test index(在尚未存在的情况下)并index一个document,指定id为1,body指定field value, 该操作可以多次执行
+POST test/_doc/1
+{
+  "field1": "val1",
+  "field2": "val2"
+}
+
+POST test/_doc/2
+{
+  "field1": "woo",
+  "field2": "bar"
+}
+
+# 测试查询
+POST test/_search
+{}
+
+# bulk API，格式见官方文档，
 POST _bulk
 { "index" : { "_index" : "test", "_id" : "1" } }
 { "field1" : "value1" }
 { "delete" : { "_index" : "test", "_id" : "2" } }
-{ "create" : { "_index" : "test2", "_id" : "3" } }
+{ "create" : { "_index" : "test", "_id" : "3" } }
 { "field1" : "value3" }
 { "update" : {"_id" : "1", "_index" : "test"} }
 { "doc" : {"field2" : "value2"} }
 
+# starndard language analyzer， 各种区别简介： https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis-analyzers.html
 GET _analyze
 {
   "analyzer": "standard",
   "text": "2 running Quick brown-foxes leap over lazy dogs in the summer evening."
 }
 
-
+# simple language analyzer
 GET _analyze
 {
   "analyzer": "simple",
   "text": "2 running Quick brown-foxes leap over lazy dogs in the summer evening."
 }
 
+# whitespace analyzer
 GET _analyze
 {
   "analyzer": "whitespace",
   "text": "2 running Quick brown-foxes leap over lazy dogs in the summer evening."
 }
 
+# keyword analyzer
 GET _analyze
 {
   "analyzer": "keyword",
   "text": "2 running Quick brown-foxes leap over lazy dogs in the summer evening."
 }
 
+# pattern analyzer
 GET _analyze
 {
   "analyzer": "pattern",
   "text": "2 running Quick brown-foxes leap over lazy dogs in the summer evening."
 }
 
+# english analyzer
 GET _analyze
 {
   "analyzer": "english",
   "text": "2 running Quick brown-foxes leap over lazy dogs in the summer evening."
 }
 
+# icu_analyzer
 POST _analyze
 {
   "analyzer": "icu_analyzer",
   "text": "他说的确实在理”"
 }
 
-GET /movies/_search?q=2012
+#The Profile API gives the user insight into how search requests are executed at a low level so that the user can understand why certain requests are slow, and take steps to improve them. 
+GET /kibana_sample_data_ecommerce/_search?q=2012
 {
   "profile": "true"
 }
@@ -650,4 +707,3 @@ GET alias1/_search
         "match_all": {}
     }
 }
-
