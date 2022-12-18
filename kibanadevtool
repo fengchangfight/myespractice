@@ -881,4 +881,21 @@ POST /kibana_sample_data_ecommerce/_search
   }
 }
 
-# bucket aggregation
+# nested aggregation
+POST /kibana_sample_data_ecommerce/_search
+{
+   "aggs": {
+    "my-agg-name": {
+      "terms": {
+        "field": "manufacturer.keyword"
+      },
+      "aggs":{
+        "inner-agg": {
+          "avg": {
+          "field": "day_of_week_i"
+          }
+        }
+      }
+    }
+  }
+}
