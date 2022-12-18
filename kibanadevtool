@@ -846,3 +846,39 @@ POST /kibana_sample_data_ecommerce/_async_search?keep_on_completion=true
 {
 }
 
+#获取异步搜索结果，注意这里搜不加target index的
+GET /_async_search/FjNjWnlUTGF5U0g2ZmVQWWZ1WDNUbVEbZ3JEamg1TnBSZU9BdmRvaU93ZkFyUTozODg1
+
+#只取异步状态，不拿结果
+GET /_async_search/status/FjNjWnlUTGF5U0g2ZmVQWWZ1WDNUbVEbZ3JEamg1TnBSZU9BdmRvaU93ZkFyUTozODg1
+
+DELETE /_async_search/FjNjWnlUTGF5U0g2ZmVQWWZ1WDNUbVEbZ3JEamg1TnBSZU9BdmRvaU93ZkFyUTozODg1
+
+
+GET /kibana_sample_data_ecommerce/_mapping
+
+# sample aggregation（bucket aggregation）
+POST /kibana_sample_data_ecommerce/_search
+{
+   "aggs": {
+    "my-agg-name": {
+      "terms": {
+        "field": "manufacturer.keyword"
+      }
+    }
+  }
+}
+
+# metrics aggregation(算分用)
+POST /kibana_sample_data_ecommerce/_search
+{
+   "aggs": {
+    "my-agg-name": {
+      "avg": {
+        "field": "day_of_week_i"
+      }
+    }
+  }
+}
+
+# bucket aggregation
