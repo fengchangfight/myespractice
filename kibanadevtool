@@ -899,3 +899,38 @@ POST /kibana_sample_data_ecommerce/_search
     }
   }
 }
+
+# 定义runtime字段
+PUT my-index-with-runtime/
+{
+  "mappings": {
+    "runtime": {
+      "day_of_week": {
+        "type": "keyword",
+        "script": {
+          "source": "emit(doc['@timestamp'].value.dayOfWeekEnum.getDisplayName(TextStyle.FULL, Locale.ROOT))"
+        }
+      }
+    },
+    "properties": {
+      "@timestamp": {"type": "date"}
+    }
+  }
+}
+
+# 插入一个document
+POST my-index-with-runtime/_doc
+{
+  "@timestamp": "2099-11-15T13:12:00"
+}
+
+# 使用fields字段来确定返回的属性
+GET my-index-with-runtime/_search
+{
+  "fields": [
+    "@timestamp",
+    "day_of_week"
+  ],
+  "_source": false
+}
+
